@@ -9,7 +9,7 @@ module ActiveParams
         current_config[k] = result
       end
     end
-    open(ActiveParams.path, "wb") {|f| f.write(JSON.pretty_generate(global_config).tap {|s| logger.info s }) }
+    open(ActiveParams.path, "wb") {|f| f.write(JSON.pretty_generate(global_config)) }
     yield
   end
 
