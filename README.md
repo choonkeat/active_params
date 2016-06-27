@@ -91,6 +91,27 @@ end
 
 When you create new features for your app & try them out in development mode, `config/active_params.json` will be automatically updated. When you commit your code, include the changes to `config/active_params.json` too.
 
+### Customizations
+
+Include instead with `ActiveParams.setup`,
+
+```ruby
+class ApplicationController < ActionController::Base
+  include ActiveParams.setup({
+    path: "tmp/strong_params.json",
+    writing: !Rails.env.production?,
+    scope: proc {|ctrl|
+      [ctrl.current_user.role, ctrl.active_params_default_scope].join('@')
+    },
+  })
+end
+```
+
+You can setup
+- where the config file is stored
+- if you want to write to the config file
+- how should strong params be scoped
+
 ## LICENSE
 
 MIT

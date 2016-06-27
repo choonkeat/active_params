@@ -5,54 +5,42 @@ class ActiveParamsTest < Minitest::Test
     refute_nil ::ActiveParams::VERSION
   end
 
-  def test_strong_params_definition_for_number
-    assert_equal 123,
-      ActiveParams.strong_params_definition_for(123)
+  # `include ActiveParams`
+  def test_defalut
+    value = rand
+    klass = Class.new do
+      include ActiveParams
+    end
+    klass.send :define_method, :active_params_default_scope do
+      value
+    end
+    assert_equal nil, klass.new.active_params_writing?
+    assert_equal ENV.fetch("ACTIVE_PARAMS_PATH", "config/active_params.json"), klass.new.active_params_path
+    assert_equal value, klass.new.active_params_scope
   end
 
-  def test_strong_params_definition_for_string
-    assert_equal "123",
-      ActiveParams.strong_params_definition_for("123")
+  # `include ActiveParams.setup...`
+  def test_setup_writing
+    value = rand
+    klass = Class.new do
+      include ActiveParams.setup(writing: value)
+    end
+    assert_equal value, klass.new.active_params_writing?
   end
 
-  def test_strong_params_definition_for_array
-    assert_equal [],
-      ActiveParams.strong_params_definition_for([123, "123"])
+  def test_setup_path
+    value = rand
+    klass = Class.new do
+      include ActiveParams.setup(path: value)
+    end
+    assert_equal value, klass.new.active_params_path
   end
 
-  def test_strong_params_definition_for
-    assert_equal [:id, :name, contacts: [:name, :relation, contacts: [:relation, :name], addresses: [:label, :address]], interests: []],
-      ActiveParams.strong_params_definition_for({
-        id: rand,
-        name: "Lorem ipsum",
-        contacts: {
-          "0" => {
-            relation: "Friend",
-            name: "Bob",
-          },
-          "1" => {
-            relation: "Mother",
-            name: "Charlie",
-            contacts: {
-              "0" => {
-                relation: "Friend",
-                name: "David",
-              },
-              "1" => {
-                relation: "Friend",
-                name: "Ethan",
-              },
-            },
-            addresses: [
-              { label: "home", address: "123 Sesame Street, NY" },
-              { label: "work", address: "Lorem ipsum"},
-            ]
-          },
-        },
-        interests: [
-          "Running",
-          "Netflix",
-        ]
-      })
+  def test_setup_scope
+    value = rand
+    klass = Class.new do
+      include ActiveParams.setup(scope: proc { value })
+    end
+    assert_equal value, klass.new.active_params_scope
   end
 end
