@@ -6,17 +6,19 @@ class ActiveParamsTest < Minitest::Test
   end
 
   # `include ActiveParams`
-  def test_defalut
+  # `ActiveParams.config`
+  def test_default
     value = rand
     klass = Class.new do
+      def request; Struct.new(:method).new("GET"); end
+      def controller_name; "home"; end
+      def action_name; "index"; end
       include ActiveParams
     end
-    klass.send :define_method, :active_params_default_scope do
-      value
-    end
-    assert_equal nil, klass.new.active_params_writing?
-    assert_equal ENV.fetch("ACTIVE_PARAMS_PATH", "config/active_params.json"), klass.new.active_params_path
-    assert_equal value, klass.new.active_params_scope
+    instance = klass.new
+    assert_equal nil, instance.active_params_writing?
+    assert_equal ENV.fetch("ACTIVE_PARAMS_PATH", "config/active_params.json"), instance.active_params_path
+    assert_equal "GET home/index", instance.active_params_scope
   end
 
   # `include ActiveParams.setup...`

@@ -16,11 +16,11 @@ module ActiveParams
     end
 
     def active_params_writing?
-      active_params_options[:writing] || defined?(Rails) && Rails.env.development?
+      active_params_options[:writing] || ActiveParams.writing
     end
 
     def active_params_path
-      active_params_options[:path] || ENV.fetch("ACTIVE_PARAMS_PATH", "config/active_params.json")
+      active_params_options[:path] || ActiveParams.path
     end
 
     def active_params_json
@@ -33,16 +33,8 @@ module ActiveParams
     end
 
     def active_params_scope
-      scope = active_params_options[:scope]
-      if scope.respond_to?(:call)
-        scope.call(self)
-      else
-        active_params_default_scope
-      end
-    end
-
-    def active_params_default_scope
-      "#{request.method} #{controller_name}/#{action_name}"
+      scope = active_params_options[:scope] || ActiveParams.scope
+      scope.respond_to?(:call) ? scope.(self) : scope
     end
 
     def active_params_write(global_json: active_params_json)

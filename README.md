@@ -91,9 +91,23 @@ end
 
 When you create new features for your app & try them out in development mode, `config/active_params.json` will be automatically updated. When you commit your code, include the changes to `config/active_params.json` too.
 
-### Customizations
+### Static Customizations
 
-Include instead with `ActiveParams.setup`,
+You can add a `config/initializers/active_params.rb` file in your Rails app, and perform a global config like this
+
+```ruby
+ActiveParams.config do |config|
+  config.writing = Rails.env.development?
+  config.path    = "config/active_params.json"
+  config.scope   = proc { |controller|
+    "#{controller.request.method} #{controller.controller_name}/#{controller.action_name}"
+  }
+end
+```
+
+### Dynamic Customizations
+
+Each controller may need its own config, e.g. some strong params are only permitted for certain current_user roles. For such controllers, use the `include ActiveParams.setup(...)` syntax instead
 
 ```ruby
 class ApplicationController < ActionController::Base
@@ -101,7 +115,7 @@ class ApplicationController < ActionController::Base
     path: "tmp/strong_params.json",
     writing: !Rails.env.production?,
     scope: proc {|ctrl|
-      [ctrl.current_user.role, ctrl.active_params_default_scope].join('@')
+      [ctrl.current_user.role, ActiveParams.scope.(ctrl)].join('@')
     },
   })
 end
